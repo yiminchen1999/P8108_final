@@ -1,0 +1,141 @@
+---
+title: "statistical method"
+author: "yimin chen"
+date: "2023-12-06"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(survival)
+library(tidyverse)
+library(ggplot2)
+library(ggfortify)
+library(survminer)
+library(biostat3)
+
+```
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+data = brv %>% 
+  drop_na()
+view(data)
+```
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+
+surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+
+# Fit Cox model
+cox_model <- coxph(surv_obj ~., data = brv)
+
+
+summary(cox_model)
+
+
+cox.zph(cox_model)
+
+```
+\newpage
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+
+km_fit <- survfit(surv_obj ~ group, data = brv)
+
+
+ggsurvplot(km_fit, data = brv, pval = TRUE, conf.int = TRUE)
+
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+
+km_fit1 <- survfit(surv_obj ~ brv$sex)
+ggsurvplot(km_fit1, data= brv,                  
+           pval = TRUE,                
+           conf.int = TRUE,           
+           risk.table = TRUE,          
+           ggtheme = theme_minimal(),  
+           palette = "Dark",         
+           main = "Kaplan-Meier Survival Curve", 
+           xlab = "Days",              
+           ylab = "Survival Probability") 
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+
+km_fit1 <- survfit(surv_obj ~ brv$group)
+ggsurvplot(km_fit1, data= brv,                  
+           pval = TRUE,                
+           conf.int = TRUE,           
+           risk.table = TRUE,          
+           ggtheme = theme_minimal(),  
+           palette = "Dark",         
+           main = "Kaplan-Meier Survival Curve", 
+           xlab = "Days",              
+           ylab = "Survival Probability") 
+```
+
+```{r}
+km_fit2 <- survfit(surv_obj ~brv$sex)
+
+
+ggsurvplot(km_fit2, data=brv,                  
+           pval = TRUE,                
+           conf.int = TRUE,           
+           risk.table = TRUE,          
+           ggtheme = theme_minimal(),  
+           palette = "Dark2",         
+           main = "Kaplan-Meier Survival Curve", 
+           xlab = "Time",              
+           ylab = "Survival Probability") 
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+# Comparing survival curves between two or more groups
+surv_diff <- survdiff(surv_obj ~ group, data = brv)
+
+# Print test results
+print(surv_diff)
+
+```
+
+
+## Log-rank test (death as event) comparing group
+```{r}
+surv_obj1 <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+
+log_rank_test <- survdiff(surv_obj1 ~ group, data = brv)
+
+print(log_rank_test)
+```
+
+```{r}
+surv_obj1 <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+
+log_rank_test2 <- survdiff(surv_obj1 ~ sex, data = brv)
+
+print(log_rank_test2)
+```
+
+```{r}
+# Creating the survival object
+surv_obj <- Surv(time = brv$dox - brv$doe, event = brv$fail)
+
+# Fit Cox model (specify variables or use '.' for all variables)
+cox_model <- coxph(surv_obj ~ ., data = brv)
+summary(cox_model)
+
+# Check proportional hazards assumption
+cox.zph(cox_model)
+```
