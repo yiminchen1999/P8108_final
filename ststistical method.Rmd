@@ -2,7 +2,9 @@
 title: "statistical method"
 author: "yimin chen"
 date: "2023-12-06"
-output: pdf_document
+output:
+    pdf_document:
+       latex_engine: xelatex
 ---
 
 
@@ -11,24 +13,57 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
+#install.packages("gt")
+library(knitr)
 library(survival)
 library(tidyverse)
 library(ggplot2)
 library(ggfortify)
 library(survminer)
 library(biostat3)
+library(gt)
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+library(biostat3)
+## Creating times relativ to spouse death (year=0)
+brv2 <- mutate(brv,
+               id=NULL,
+               y_before_sp_dth =  as.numeric(doe -dosp) / 365.24,
+               y_after_sp_dth = as.numeric(dox - dosp) / 365.24)
+
+## Splitting at spouse death (year=0)
+brvSplit <- survSplit(brv2, cut = 0, end="y_after_sp_dth", start="y_before_sp_dth", id="id",event="fail")
+
+## Calculating risk times
+brvSplit <- mutate(brvSplit,
+                   t_sp_at_risk =   y_after_sp_dth - y_before_sp_dth,
+                   brv = ifelse(y_after_sp_dth > 0, 1, 0))
+
 
 ```
 
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
-data = brv %>% 
-  drop_na()
-view(data)
+The mutate function from the dplyr package (assumed as it's not explicitly loaded but commonly used for such operations) is used to modify the brv data frame.
+Two new columns are created: y_before_sp_dth and y_after_sp_dth. These represent the number of years before and after the death of a spouse (dosp), calculated by subtracting the date of the event of interest (doe or dox) from the date of the spouse's death and converting the difference into years (dividing by 365.24, the average number of days in a year accounting for leap years).
+
+
+The survSplit function from the survival package is used to split the data into periods before and after the spouse's death. This is done by specifying a cut point at year 0 (the year of the spouse's death).
+The function creates new observations in the dataset, splitting any observation that spans the time point 0 into two, one before and one after the spouse's death.
+Further Data Transformation:
+
+Another mutate function is used to calculate two new variables: t_sp_at_risk (the time at risk after the spouse's death, calculated as the difference between y_after_sp_dth and y_before_sp_dth) and brv (a binary indicator set to 1 if the event occurred after the spouse's death, otherwise 0).
+
+```{r}
+summary(brvSplit)
+library(skimr)
+skimr::skim(brvSplit)
+
 ```
 
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE}
 
 
 surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
@@ -43,10 +78,91 @@ summary(cox_model)
 cox.zph(cox_model)
 
 ```
+
+
+```{r}
+
+
+surv_object <- Surv(time = brvSplit$dox-brvSplit$doe, event = brvSplit$fail)
+
+# Generate the life table using Kaplan-Meier estimate
+life_table <- survfit(surv_object ~ 1)
+
+# Print the life table
+print(life_table)
+
+life_table
+plot(life_table, main = "Survival Curve", xlab = "Time", ylab = "Survival Probability")
+
+```
+
+male
+```{r, message = FALSE, warning = FALSE}
+lifetable1=lifetab2(Surv(time = brvSplit$dox-brvSplit$doe, brvSplit$fail==1) ~ 1, brvSplit[brvSplit$sex==1,], breaks = seq(0, 3000, by = 300))
+print(lifetable1)
+```
+
+
+
+\newpage
+female
+```{r, message = FALSE, warning = FALSE}
+lifetable2=lifetab2(Surv(time = brvSplit$dox-brvSplit$doe, brvSplit$fail==1) ~ 1, brvSplit[brvSplit$sex==2,], breaks = seq(0, 3000, by = 300))
+print(lifetable2)
+```
+
+
+
+## KM and FH 
+```{r , message = FALSE, warning = FALSE}
+fit <- brvSplit%>%
+  survfit(Surv(brvSplit$dox-brvSplit$doe, fail==1) ~ brv, data = .)
+
+fit2 <- brvSplit %>%
+  survfit(Surv(brvSplit$dox-brvSplit$doe, fail==0) ~ brv, data = ., type = "fleming")
+
+splots <- list()
+
+splots[[1]] <- ggsurvplot(fit, data = brvSplit, pval = TRUE, title = "Kaplan-Meier")
+splots[[2]] <- ggsurvplot(fit2, data = brvSplit, pval = TRUE, title = "Fleming-Harrington")
+
+arrange_ggsurvplots(splots, print = TRUE,
+  ncol = 2, nrow = 1)
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+fit3 <- brvSplit%>%
+  survfit(Surv(brvSplit$dox-brvSplit$doe, fail==1) ~ sex, data = .)
+
+fit4 <- brvSplit %>%
+  survfit(Surv(brvSplit$dox-brvSplit$doe, fail==0) ~ sex, data = ., type = "fleming")
+
+splots <- list()
+
+splots[[1]] <- ggsurvplot(fit3, data = brvSplit, pval = TRUE, title = "Kaplan-Meier")
+splots[[2]] <- ggsurvplot(fit4, data = brvSplit, pval = TRUE, title = "Fleming-Harrington")
+
+arrange_ggsurvplots(splots, print = TRUE,
+  ncol = 2, nrow = 1)
+```
+
+
+```{r}
+plot(fit3, conf.int = FALSE, col = "blue",
+     xlab = "Time (Days)", ylab = "Estimated Survival Probability",
+     main = "Comparison of S(t) between K-M and F-H methods")
+lines(fit4, conf.int = FALSE, col = "red")
+legend("topright", c("Kaplan-Meier", "Fleming-Harrington"),
+       col = c("blue", "red"), lty = 1, bty = "n")
+```
+
+
+
 \newpage
 
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE}
 
 
 km_fit <- survfit(surv_obj ~ group, data = brv)
@@ -56,7 +172,7 @@ ggsurvplot(km_fit, data = brv, pval = TRUE, conf.int = TRUE)
 
 ```
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE}
 surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
 
 km_fit1 <- survfit(surv_obj ~ brv$sex)
@@ -71,7 +187,7 @@ ggsurvplot(km_fit1, data= brv,
            ylab = "Survival Probability") 
 ```
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE}
 surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
 
 km_fit1 <- survfit(surv_obj ~ brv$group)
