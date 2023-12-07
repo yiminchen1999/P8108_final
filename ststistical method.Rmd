@@ -139,3 +139,21 @@ summary(cox_model)
 # Check proportional hazards assumption
 cox.zph(cox_model)
 ```
+
+
+Kaplan-Meier Estimation:
+
+
+$S(t) = \prod_{t_i \leq t} \left(1 - \frac{d_i}{n_i}\right)$
+
+
+Where $S(t)$ is the survival probability at time $t_i$, $d_i$ is the number of events at time $t_i$, and $n_i$ is the number of subjects at risk at time $t_i$.
+
+
+Cox Proportional Hazards Model:
+
+
+$h(t) = h_0(t) \exp(\beta_1 \cdot \text{pspline(age)} + \beta_2 \cdot \text{size} + \beta_3 \cdot \text{grade} + \beta_4 \cdot \text{nodes} + \beta_5 \cdot \text{pgr} + \beta_6 \cdot \text{er} + \beta_7 \cdot \text{hormon} + \beta_8 \cdot \text{chemo})$
+
+
+Where $h(t)$ is the hazard at time $t_i$, $h_0(t)$ is the baseline hazard, $\beta_1, \beta_2, ..., \beta_8$ are the coefficients for each covariate, which include age modeled with a penalized spline, tumor size, grade, number of positive lymph nodes, progesterone receptor levels, estrogen receptor levels, hormonal treatment, and chemotherapy, respectively.
