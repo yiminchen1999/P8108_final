@@ -1,0 +1,135 @@
+---
+title: "log_rank_test"
+author: "yimin chen"
+date: "2023-12-06"
+output:
+    pdf_document:
+       latex_engine: xelatex
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+#install.packages("xtable")
+
+library(xtable)
+library(knitr)
+library(survival)
+library(tidyverse)
+library(ggplot2)
+library(ggfortify)
+library(survminer)
+library(biostat3)
+library(gt)
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+library(biostat3)
+## Creating times relativ to spouse death (year=0)
+brv2 <- mutate(brv,
+               id=NULL,
+               y_before_sp_dth =  as.numeric(doe -dosp) / 365.24,
+               y_after_sp_dth = as.numeric(dox - dosp) / 365.24)
+
+## Splitting at spouse death (year=0)
+brvSplit <- survSplit(brv2, cut = 0, end="y_after_sp_dth", start="y_before_sp_dth", id="id",event="fail")
+
+## Calculating risk times
+brvSplit <- mutate(brvSplit,
+                   t_sp_at_risk =   y_after_sp_dth - y_before_sp_dth,
+                   brv = ifelse(y_after_sp_dth > 0, 1, 0))
+
+```
+
+
+## Log-rank test (death as event) comparing group
+
+
+```{r}
+surv_obj1 <- Surv(time = brvSplit$dox-brvSplit$doe, event = brvSplit$fail)
+
+log_rank_test <- survdiff(surv_obj1 ~ group, data = brvSplit)
+table(brvSplit$fail)
+
+print(log_rank_test)
+```
+
+```{r}
+# Assuming you have a data frame `results` with the appropriate data
+results <- data.frame(
+  Group = 1:3,
+  N = c(329, 150, 76),
+  'Observed Events' = c(155, 79, 44),
+  'Expected Events' = c(162.6, 78.7, 36.7),
+  '(O-E)^2/E' = c(0.355, 0.00097, 1.461),
+  '(O-E)^2/V' = c(0.856, 0.00136, 1.689)
+)
+
+# Load the gt package
+library(gt)
+
+# Create a gt table from your data frame
+gt_table <- gt(results) %>%
+  tab_header(
+    title = "Observed and Expected Event Counts in Survival Analysis"
+  ) %>%
+  cols_label(
+    N = "N",
+    Observed_Events = "Observed Events",
+    Expected_Events = "Expected Events",
+    `(O-E)^2/E` = "(O-E)^2/E",
+    `(O-E)^2/V` = "(O-E)^2/V"
+  )
+
+# Print the gt table
+gt_table
+
+```
+
+Groups Compared: The analysis assessed survival times post spouse's death between three groups based on their failure status.
+
+Number of Subjects (N): The dataset included 277 subjects who did not experience the event (fail=0) and 278 subjects who did (fail=1).
+
+For group 1 with 329 subjects, the number of observed events is 155, which is slightly less than the expected count of 162.6. Group 2, with 150 subjects, had events precisely as expected (79 observed vs. 78.7 expected). Group 3, with 76 subjects, had more events than expected (44 observed vs. 36.7 expected).
+
+The chi-square statistic is 1.8 with 2 degrees of freedom, resulting in a p-value of 0.4. This p-value is much higher than the conventional alpha level of 0.05, suggesting there is no statistically significant difference in survival across the three groups.
+
+## Log-rank test comparing sex
+```{r}
+surv_obj1 <- Surv(time = brvSplit$dox-brvSplit$doe, event = brvSplit$fail)
+
+log_rank_test2 <- survdiff(surv_obj1 ~ sex, data = brvSplit)
+
+print(log_rank_test2)
+```
+
+Groups Compared: The log-rank test evaluated survival differences post spouse's death between males and females.
+
+Number of Subjects (N): There were 295 males and 260 females in the study.
+
+The observed number of events for males was 181, significantly higher than the expected 135, indicating a higher event rate than anticipated. In contrast, females experienced 97 events, less than the expected 143, indicating a lower event rate than anticipated.
+
+The chi-square statistic is 30.6 with 1 degree of freedom, resulting in a p-value of 3e-08. This extremely low p-value indicates a highly statistically significant difference in survival between males and females.
+
+
+## Log-rank test comparing brv
+the variable brv: a subject changes exposure status from not bereaved to bereaved when his or her spouse dies.
+```{r}
+surv_obj1 <- Surv(time = brvSplit$dox-brvSplit$doe, event = brvSplit$fail)
+
+log_rank_test3 <- survdiff(surv_obj1 ~ brv, data = brvSplit)
+
+print(log_rank_test3)
+```
+
+Groups Compared: The log-rank test investigated the change in bereavement status on survival after a spouse's death.
+
+Number of Subjects (N): The analysis involved 399 subjects not bereaved (brv=0) and 156 bereaved (brv=1).
+
+For the non-bereaved group, there were 197 observed events, slightly more than the expected 184.1. For the bereaved group, there were 81 observed events, fewer than the expected 93.9.
+
+The chi-square statistic is 2.7 with 1 degree of freedom, which corresponds to a p-value of 0.1. This p-value suggests that the difference in survival between the bereaved and non-bereaved groups is not statistically significant.

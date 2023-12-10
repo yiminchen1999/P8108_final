@@ -1,0 +1,75 @@
+---
+title: "Survival Analysis: Impact of Marital Bereavement on Mortality among the Elderly"
+author: "Yimin Chen (yc4195), Qingyue Zhuo (qz2493), Jiarui Yu (jy3360) "
+date: "2023-12-11"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{lipsum}
+- \pagestyle{fancy}
+- \fancyhead[R]{\thepage}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+- \usepackage{algorithm}
+- \usepackage{algpseudocode}
+- \usepackage{amsthm}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(tinytex.verbose = TRUE)
+library(knitr)
+library(tibble)
+```
+
+\newpage 
+
+# Abstract
+
+This study addresses the critical issue of understanding how marital bereavement affects mortality risks in the elderly. Previous studies have suggested that losing a spouse can significantly impact an individual's health, but quantifying this effect remains challenging. The primary objective of this project is to assess the impact of marital bereavement on the risk of death among the elderly, with a focus on how this risk is modified by demographic and health-related factors. We used xxxx [method]. Our result shows that xxx [conclusion]. 
+
+# Background and Objectives
+
+The aging process is accompanied by various life events that can significantly impact health outcomes. The loss of a spouse stands out as a particularly traumatic experience with potential long-term effects on the survivor's well-being. Marital bereavement has been associated with increased mortality rates, commonly referred to as the "widowhood effect." Understanding the dynamics of how marital bereavement influences mortality is critical for public health and for developing interventions aimed at supporting the bereaved elderly population.
+
+The primary objective of this research is to quantify the impact of marital bereavement on all-cause mortality among the elderly. While previous studies have established a link between spousal loss and increased mortality risk, many questions remain regarding the mechanisms at play and the moderating role of demographic and health-related factors. This study seeks to examine the extent of these influences and captures relevant variables. Given the aging global population and the associated increase in the incidence of bereavement among older adults, this research holds significant value for health policy and geriatric care.
+
+
+# Methods
+
+## Study data
+
+
+
+## Statistical methods
+
+
+
+\newpage
+
+# Results
+
+
+
+# Discussion 
+
+
+
+# Conlusion
+
+
+
+\newpage
+# References
+
+
+\newpage 
+# Appendix {-}
+
+

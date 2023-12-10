@@ -1,0 +1,82 @@
+---
+title: "coxph"
+author: "yimin chen"
+date: "2023-12-07"
+output:
+    pdf_document:
+       latex_engine: xelatex
+---
+
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+#install.packages("gt")
+library(knitr)
+library(survival)
+library(tidyverse)
+library(ggplot2)
+library(ggfortify)
+library(survminer)
+library(biostat3)
+library(gt)
+```
+# In these data a subject changes exposure status from not bereaved to bereaved when his or her spouse dies. The first stage of the analysis therefore is to partition each follow–up into a record describing the period of follow-up pre–bereavement and (for subjects who were bereaved during the study) the period post–bereavement.
+
+```{r, message = FALSE, warning = FALSE}
+## Creating times relativ to spouse death (year=0)
+brv2 <- mutate(brv,
+               id=NULL,
+               y_before_sp_dth =  as.numeric(doe -dosp) / 365.24,
+               y_after_sp_dth = as.numeric(dox - dosp) / 365.24)
+
+## Splitting at spouse death (year=0)
+brvSplit <- survSplit(brv2, cut = 0, end="y_after_sp_dth", start="y_before_sp_dth", id="id",event="fail")
+
+## Calculating risk times
+brvSplit <- mutate(brvSplit,
+                   t_sp_at_risk =   y_after_sp_dth - y_before_sp_dth,
+                   brv = ifelse(y_after_sp_dth > 0, 1, 0))
+
+
+```
+
+
+```{r}
+brvSplit2 <- mutate(brvSplit,
+                    sex = as.factor(sex),
+                    brv = as.factor(brv))
+## Translate time scale from years from spouse death to ages
+brvSplit3 <- brvSplit2 %>%
+    mutate(age_sp_dth =  as.numeric(dosp - dob) / 365.24, # Age at spouse death
+           age_start = age_sp_dth + y_before_sp_dth,      # Age at start of timeband
+           age_end = age_sp_dth + y_after_sp_dth)         # Age at end of timeband
+
+age_cat <- seq(70,100,5) # Split at these ages
+brvSplit4 <- survSplit(brvSplit3, cut=age_cat, start="age_start", end="age_end", event="fail", zero = 0)
+
+brvSplit4 <- mutate(brvSplit4,
+                    t_at_risk = age_end- age_start, # Creating new time at risk
+                    age = cut(age_end, age_cat))   # Creating age band category
+
+## Calculate crude rates
+survRate(Surv(t_at_risk, fail) ~ age, data=brvSplit4)
+summary(coxph(Surv(age_start, age_end, fail) ~ brv,
+              data = brvSplit4))
+```
+
+# also model these data using Cox regression. Provided we use the attained age as the time scale and split the data to obtain separate observations for the bereaved and non-bereaved person-time the following command will estimate the effect of bereavement adjusted for attained age.
+```{r}
+summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
+              data = brvSplit4))
+
+summary(coxph(Surv(age_start, age_end, fail) ~ brv,
+              data = brvSplit4))
+```
+
+# Use the Cox model to estimate the effect of bereavement separately for males and females and compare the estimates to those obtained using Poisson regression.
+```{r}
+
+summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
+              data = brvSplit4))
+```
+
