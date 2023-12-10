@@ -63,22 +63,41 @@ skimr::skim(brvSplit)
 ```
 
 
-```{r, message = FALSE, warning = FALSE}
+
+```{r}
+brvSplit2 <- mutate(brvSplit,
+                    sex = as.factor(sex),
+                    brv = as.factor(brv))
+## Translate time scale from years from spouse death to ages
+brvSplit3 <- brvSplit2 %>%
+    mutate(age_sp_dth =  as.numeric(dosp - dob) / 365.24, # Age at spouse death
+           age_start = age_sp_dth + y_before_sp_dth,      # Age at start of timeband
+           age_end = age_sp_dth + y_after_sp_dth)         # Age at end of timeband
+
+age_cat <- seq(70,100,5) # Split at these ages
+brvSplit4 <- survSplit(brvSplit3, cut=age_cat, start="age_start", end="age_end", event="fail", zero = 0)
+
+brvSplit4 <- mutate(brvSplit4,
+                    t_at_risk = age_end- age_start, # Creating new time at risk
+                    age = cut(age_end, age_cat))   # Creating age band category
+
+## Calculate crude rates
+survRate(Surv(t_at_risk, fail) ~ age, data=brvSplit4)
+summary(coxph(Surv(age_start, age_end, fail) ~ brv,
+              data = brvSplit4))
 
 
-surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
+summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
+              data = brvSplit4))
 
-# Fit Cox model
-cox_model <- coxph(surv_obj ~., data = brv)
-
-
-summary(cox_model)
+summary(coxph(Surv(age_start, age_end, fail) ~ brv,
+              data = brvSplit4))
 
 
-cox.zph(cox_model)
-
+summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
+              data = brvSplit4))
+write.csv(brvSplit4, "brvSplit4.csv")
 ```
-
 
 ```{r}
 
@@ -162,15 +181,7 @@ legend("topright", c("Kaplan-Meier", "Fleming-Harrington"),
 \newpage
 
 
-```{r, message = FALSE, warning = FALSE}
 
-
-km_fit <- survfit(surv_obj ~ group, data = brv)
-
-
-ggsurvplot(km_fit, data = brv, pval = TRUE, conf.int = TRUE)
-
-```
 
 ```{r, message = FALSE, warning = FALSE}
 surv_obj <- Surv(time = brv$dox-brv$doe, event = brv$fail)
@@ -257,19 +268,26 @@ cox.zph(cox_model)
 ```
 
 
-Kaplan-Meier Estimation:
+Kaplan-Meier and Fleming-Harrington model
 
+For nonparametric estimator, Kaplan-Meier(KM) model and Fleming-Harrington(FH) model were used to measure the fraction of subjects living for a certain amount of time after treatment with the stratify of sex.[3]
 
-$S(t) = \prod_{t_i \leq t} \left(1 - \frac{d_i}{n_i}\right)$
+The Kaplan-Meier estimator
 
+$$ 
+\hat S_K(t)= \begin{cases}
+1 & \text { if } t< t_1  \\ 
+\prod_{t_i \le t} [1-\frac{d_i}{n_i}] & \text { if }   t \ge t_1
+\end{cases}
+$$
 
-Where $S(t)$ is the survival probability at time $t_i$, $d_i$ is the number of events at time $t_i$, and $n_i$ is the number of subjects at risk at time $t_i$.
+note: $d_i = \# \ of\ failure \ at \ time\ t_i$, $n_i = \#\ at\ risk \ at \  t_i^-$,  $c_i = \# \ censored\ during\ the\ interval\ [t_i, t_{i+1}]$
 
+The Fleming-Harrington estimator
 
-Cox Proportional Hazards Model:
-
-
-$h(t) = h_0(t) \exp(\beta_1 \cdot \text{pspline(age)} + \beta_2 \cdot \text{size} + \beta_3 \cdot \text{grade} + \beta_4 \cdot \text{nodes} + \beta_5 \cdot \text{pgr} + \beta_6 \cdot \text{er} + \beta_7 \cdot \text{hormon} + \beta_8 \cdot \text{chemo})$
-
-
-Where $h(t)$ is the hazard at time $t_i$, $h_0(t)$ is the baseline hazard, $\beta_1, \beta_2, ..., \beta_8$ are the coefficients for each covariate, which include age modeled with a penalized spline, tumor size, grade, number of positive lymph nodes, progesterone receptor levels, estrogen receptor levels, hormonal treatment, and chemotherapy, respectively.
+$$ 
+\hat S_F(t)= \begin{cases}
+1 & \text { if } t< t_1  \\ 
+\prod_{t_i \le t} exp[-\frac{d_i}{n_i}] & \text { if }   t \ge t_1
+\end{cases}
+$$
