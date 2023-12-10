@@ -133,3 +133,12 @@ Number of Subjects (N): The analysis involved 399 subjects not bereaved (brv=0) 
 For the non-bereaved group, there were 197 observed events, slightly more than the expected 184.1. For the bereaved group, there were 81 observed events, fewer than the expected 93.9.
 
 The chi-square statistic is 2.7 with 1 degree of freedom, which corresponds to a p-value of 0.1. This p-value suggests that the difference in survival between the bereaved and non-bereaved groups is not statistically significant.
+
+
+```{r}
+surv_obj1 <- Surv(time = brvSplit$dox-brvSplit$doe, event = brvSplit$fail)
+
+log_rank_test4 <- survdiff((surv_obj1 ~ brv+brv*group), data = brvSplit))
+
+print(log_rank_test4)
+```

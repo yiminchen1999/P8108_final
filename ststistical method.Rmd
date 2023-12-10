@@ -27,6 +27,7 @@ library(gt)
 
 ```{r, message = FALSE, warning = FALSE}
 library(biostat3)
+write_csv(brv,"brv.csv")
 ## Creating times relativ to spouse death (year=0)
 brv2 <- mutate(brv,
                id=NULL,
@@ -96,8 +97,9 @@ summary(coxph(Surv(age_start, age_end, fail) ~ brv,
 
 summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
               data = brvSplit4))
-write.csv(brvSplit4, "brvSplit4.csv")
+
 ```
+
 
 ```{r}
 

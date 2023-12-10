@@ -75,8 +75,69 @@ summary(coxph(Surv(age_start, age_end, fail) ~ brv,
 
 # Use the Cox model to estimate the effect of bereavement separately for males and females and compare the estimates to those obtained using Poisson regression.
 ```{r}
-
-summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex,
-              data = brvSplit4))
+cox_model=coxph(Surv(age_start, age_end, fail) ~ brv + sex+group+disab+health,data = brvSplit4)
+sum.cox=summary(coxph(Surv(age_start, age_end, fail) ~ brv + sex+group+disab+health,data = brvSplit4))
+cox.coeff = sum.cox$coefficients
+kable(cox.coeff,digit = 6)
 ```
+
+```{r}
+# Build the table for test
+lrt = tibble(sum.cox$logtest) 
+wald = tibble(sum.cox$waldtest) 
+logrank = tibble(sum.cox$sctest)
+test_table1 = cbind(lrt, wald, logrank)
+rownames(test_table1) = c("test_statistics", "df", "pvalue") 
+colnames(test_table1) = c("Likelihood Ratio", "Wald", "Logrank")
+test_table1 = round(test_table1, digits = 6)
+kable(test_table1)
+```
+
+```{r}
+model.aic <- step(cox_model, direction = "both", k = 2)
+```
+# lowest aic: Surv(age_start, age_end, fail) ~ sex + disab + health
+
+```{r}
+sr_fit=coxph(Surv(age_start, age_end, fail) ~ sex + disab + health, data =brvSplit4)
+czph <- cox.zph(coxph(Surv(age_start, age_end, fail) ~ sex + disab + health, data =brvSplit4)) 
+czph
+```
+
+```{r}
+plot(czph[1],ylim=c(-10,10))
+abline(a=0,b=0,col=2) 
+abline(h=sr_fit$coefficients[1],col=3,lwd=2,lty=2)
+```
+
+```{r}
+plot(czph[2],ylim=c(-3,3))
+abline(a=0,b=0,col=2) 
+abline(h=sr_fit$coefficients[2],col=3,lwd=2,lty=2)
+```
+
+```{r}
+residual=ggcoxzph(czph,font.main=10,font.x=10,font.y=10, font.tickslab=8,point.alpha=0.5)
+residual
+```
+
+
+The Global Schoenfeld Test has a p-value of 0.004397, which is below the common alpha level of 0.05, indicating that there is statistically significant evidence against the proportional hazards assumption across all covariates in the model. This suggests that the hazard ratios for the covariates in the model are not consistent over time.
+
+The individual Schoenfeld Test for the 'sex' variable has a p-value of 0.0757, which is above the 0.05 threshold, suggesting that there is no significant evidence against the proportional hazards assumption for the 'sex' variable. The plot for 'sex' shows residuals scattered around the zero line without any apparent trend, which is in line with the proportional hazards assumption.
+
+The individual Schoenfeld Test for 'disab' (presumably 'disability') has a p-value of 0.2652, also indicating no significant violation of the proportional hazards assumption for this variable. 
+
+Lastly, the individual Schoenfeld Test for 'health' has a very low p-value of 7e-04, indicating a significant violation of the proportional hazards assumption for this variable. 
+
+In summary, the Cox model may not be appropriate for the 'health' variable due to violation of the proportional hazards assumption. The 'sex' and 'disab' variables do not show evidence against this assumption. It may be necessary to explore time-varying covariates or alternative models for the 'health' variable to adequately model these data.
+
+
+```{r}
+outlier <- ggcoxdiagnostics(coxph(Surv(age_start, age_end, fail) ~ sex + disab + health, data =brvSplit4), type = "dfbeta", linear.predictions = FALSE, ggtheme = theme_bw())
+outlier
+```
+From the plots, it seems that for all covariates, there is no clear pattern of systematic influence, and no single observation appears to be particularly influential, as most of the dfbeta values are close to zero and within the confidence band.
+
+
 
