@@ -61,10 +61,12 @@ The dataset includes a wide range of variables, including individual ID (id), co
 
 The data features right-censoring where the event of interest (death) has not occurred for all subjects by the end of the study period. The 'dosp' variable provides information about the date of the spouse's death; it is coded with a specific date if the spouse died during the study period or a uniform date (January 1, 2000) if the spouse was still alive at the study's conclusion. 
 
-<center>
+\begin{table}[h!]
+  \centering
+  \includegraphics[width=0.75 \textwidth, keepaspectratio]{1.png}
+\end{table}
 
-![](1.png)
-</center>
+
 
 The study population primarily consists of elderly couples categorized into three distinct groups based on their age and living arrangements at the time of the initial interview. Group 1 comprises 226 index cases, all of whom were 75 years or older and lived in a two-person household. Group 2 includes 118 index cases with spouses younger than 75 years, also living in two-person households. Lastly, Group 3 contains 55 index cases who resided with a spouse and another person. The baseline characteristics of the sample include demographic information (age and sex), health status, and level of disability. 
 
@@ -211,17 +213,21 @@ $$
 
 The life table analysis reveals a gender-based discrepancy in survival times, indicating that the median survival time for females falls between 1800 and 2100 days, whereas for males, it ranges from 1500 to 1800 days. Notably, females exhibit a significantly longer median survival duration compared to their male counterparts. That is also true for other time points.  
 
-<center>
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth, keepaspectratio]{5.png}
+  \caption{Life table (male)}
+  \label{fig:lifetable_male}
+\end{figure}
 
-\includegraphics[scale=0.25]{5.png}
 
-</center>
 
-<center>
-
-![Lifetable (female)](4.png)
-
-</center>
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth, keepaspectratio]{4.png}
+  \caption{Life table (female)}
+  \label{fig:lifetable_female}
+\end{figure}
 
 
 \newpage
@@ -233,14 +239,20 @@ The life table analysis reveals a gender-based discrepancy in survival times, in
 In the investigation of the impact of marital bereavement status on survival time, both the Kaplan-Meier (KM) Estimator and Fleming-Harrington (FH) Estimator were employed. The KM estimator yielded a p-value of 0.01, surpassing the conventional significance threshold of 0.05. This result implies that the observed change in marital bereavement status is not statistically significant in relation to the survival time among the elderly population.
 Conversely, the FH estimator exhibited a p-value below 0.05, suggesting statistical significance and implying that the change in bereavement status has a notable impact on survival time according to this estimator. Despite similar trends between the KM and FH models, there is an observed difference in the estimation value across time. the FH estimator indicates a higher value compared to the KM estimator most of the time. However, towards the conclusion of the study period, there is a notable and abrupt decrease in the FH estimator.
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.7\textwidth, keepaspectratio]{6.png}
+  \caption{Kaplan-Meier model and Fleming-Harrington model}
+  \label{fig:KM_FH}
+\end{figure}
 
-```{r,echo=FALSE, out.width= "90%" , fig.align='center',fig.cap=c("Kaplan-Meier modeland Fleming-Harrington model")}
-knitr::include_graphics("6.png")
-```
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.6\textwidth, keepaspectratio]{7.png}
+  \caption{Comparison of Kaplan-Meier modeland Fleming-Harrington model}
+  \label{fig:KM_FH_2}
+\end{figure}
 
-```{r,echo=FALSE, out.width= "90%" , fig.align='center',fig.cap=c("Comparison of Kaplan-Meier modeland Fleming-Harrington model")}
-knitr::include_graphics("7.png")
-```
 
 
 
@@ -275,10 +287,13 @@ Employing stepwise selection, a refined model was constructed, encompassing thre
 Final Model Evaluation:
 The final model, comprising the aforementioned variables, was assessed using the Akaike Information Criterion (AIC). Notably, this model yielded the lowest AIC value, standing at 2702.01. The minimized AIC underscores the model's improved goodness of fit and parsimony, suggesting its efficacy in capturing the essential predictors contributing to the mortality of patients under consideration.
 
-```{r,echo=FALSE, out.width= "70%", fig.cap=c("Stepwise Selectioin Model Results"), fig.align='center'}
-knitr::include_graphics("8.png")
-```
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.6 \textwidth, keepaspectratio]{8.png}
+  \caption{Stepwise Selectioin Model Results}
+  \label{fig:Stepwise}
+\end{figure}
 
 ## Model Checking  
 
