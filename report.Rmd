@@ -213,7 +213,7 @@ The life table analysis reveals a gender-based discrepancy in survival times, in
 
 <center>
 
-![Lifetable (male)](5.png)
+\includegraphics[scale=0.25]{5.png}
 
 </center>
 
