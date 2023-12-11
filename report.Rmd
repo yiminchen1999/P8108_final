@@ -230,6 +230,10 @@ The life table analysis reveals a gender-based discrepancy in survival times, in
 **The Kaplan-Meier and Fleming-Harrington model** 
 
 
+In the investigation of the impact of marital bereavement status on survival time, both the Kaplan-Meier (KM) Estimator and Fleming-Harrington (FH) Estimator were employed. The KM estimator yielded a p-value of 0.01, surpassing the conventional significance threshold of 0.05. This result implies that the observed change in marital bereavement status is not statistically significant in relation to the survival time among the elderly population.
+Conversely, the FH estimator exhibited a p-value below 0.05, suggesting statistical significance and implying that the change in bereavement status has a notable impact on survival time according to this estimator. Despite similar trends between the KM and FH models, there is an observed difference in the estimation value across time. the FH estimator indicates a higher value compared to the KM estimator most of the time. However, towards the conclusion of the study period, there is a notable and abrupt decrease in the FH estimator.
+
+
 ```{r,echo=FALSE, out.width= "90%" , fig.align='center',fig.cap=c("Kaplan-Meier modeland Fleming-Harrington model")}
 knitr::include_graphics("6.png")
 ```
@@ -237,12 +241,6 @@ knitr::include_graphics("6.png")
 ```{r,echo=FALSE, out.width= "90%" , fig.align='center',fig.cap=c("Comparison of Kaplan-Meier modeland Fleming-Harrington model")}
 knitr::include_graphics("7.png")
 ```
-
-
-In the investigation of the impact of marital bereavement status on survival time, both the Kaplan-Meier (KM) Estimator and Fleming-Harrington (FH) Estimator were employed. The KM estimator yielded a p-value of 0.01, surpassing the conventional significance threshold of 0.05. This result implies that the observed change in marital bereavement status is not statistically significant in relation to the survival time among the elderly population.
-Conversely, the FH estimator exhibited a p-value below 0.05, suggesting statistical significance and implying that the change in bereavement status has a notable impact on survival time according to this estimator. Despite similar trends between the KM and FH models, there is an observed difference in the estimation value across time. the FH estimator indicates a higher value compared to the KM estimator most of the time. However, towards the conclusion of the study period, there is a notable and abrupt decrease in the FH estimator.
-
-
 
 
 
@@ -317,10 +315,13 @@ The primary limitation of our study pertains to the modest size of our dataset, 
 Additionally, another noteworthy limitation stems from the absence of a "treatment" variable in our dataset. Consequently, our analysis lacks insight into potential health interventions or treatments related to the observed outcomes. Instead, our focus centers on investigating the impact of bereavement on the life expectancy of the elderly. To address this limitation and enhance the scope of our study, we propose the inclusion of additional datasets capturing information on interventions relevant to bereavement, such as counseling, psychotherapy, or physical exercise provided to older individuals. This augmentation would enable us to assess the influence of these interventions on survival outcomes, thereby enriching the depth and applicability of our analysis.
 
 
-
 # Conclusion
 
+In comparing individuals with or without a change in bereavement status, no statistically significant difference in survival probability is observed at the conclusion of the study. However, when considering the Cox proportional hazards model, significant associations are evident for sex, health status, and disability level with mortality rates. Specifically, female patients exhibit a higher survival rate compared to males, individuals in better health status have a higher survival rate than those in worse health status, and patients without disability demonstrate a higher survival rate than those with disabilities. These findings align with common observations.
 
+It is important to note that in the final model, which includes sex, health status, and disability variables, the assumption of proportional hazards is strongly contradicted by the variable representing sex. This implies that the hazard ratio for sex is not constant over time, indicating a temporal variation in survival probabilities between genders.
+
+The gender-related variable significantly challenges the fact that hazards are proportionally constant. This suggests that the hazard ratio for gender changes over time, indicating a temporal fluctuation in survival probabilities between males and females. To address this breach of the proportional hazards assumption in the analysis, researchers might consider investigating alternative modeling approaches like stratification or integrating time-varying covariates.
 
 \newpage
 # References
